@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { Toaster } from "@/components/ui/toaster";
 import { WordGrid } from './WordGrid';
 import { WordList } from './WordList';
 import { GameControls } from './GameControls';
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { LightbulbIcon } from "lucide-react";
 
 type Difficulty = 'easy' | 'medium' | 'hard';
+type Direction = 'horizontal' | 'vertical' | 'diagonal';
 
-export const WordSearchGame = () => {
+const WordSearchGame = () => {
   const [grid, setGrid] = useState<string[][]>([]);
   const [words, setWords] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
@@ -18,17 +19,108 @@ export const WordSearchGame = () => {
   const [hintPosition, setHintPosition] = useState<{ row: number; col: number } | null>(null);
   const { toast } = useToast();
 
+  const placeWord = (grid: string[][], word: string, size: number): boolean => {
+    const directions: Direction[] = ['horizontal', 'vertical', 'diagonal'];
+    const direction = directions[Math.floor(Math.random() * directions.length)];
+    
+    // Try 100 times to place the word
+    for (let attempts = 0; attempts < 100; attempts++) {
+      let row = Math.floor(Math.random() * size);
+      let col = Math.floor(Math.random() * size);
+      
+      // Check if word fits in chosen direction
+      if (canPlaceWord(grid, word, row, col, direction, size)) {
+        placeWordInGrid(grid, word, row, col, direction);
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const canPlaceWord = (
+    grid: string[][],
+    word: string,
+    startRow: number,
+    startCol: number,
+    direction: Direction,
+    size: number
+  ): boolean => {
+    const directionVectors = {
+      horizontal: { dx: 1, dy: 0 },
+      vertical: { dx: 0, dy: 1 },
+      diagonal: { dx: 1, dy: 1 }
+    };
+    
+    const { dx, dy } = directionVectors[direction];
+    
+    // Check if word fits within grid bounds
+    if (
+      startRow + word.length * dy > size ||
+      startCol + word.length * dx > size
+    ) {
+      return false;
+    }
+    
+    // Check if path is clear or matches existing letters
+    for (let i = 0; i < word.length; i++) {
+      const row = startRow + i * dy;
+      const col = startCol + i * dx;
+      const currentCell = grid[row][col];
+      
+      if (currentCell !== '' && currentCell !== word[i]) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const placeWordInGrid = (
+    grid: string[][],
+    word: string,
+    startRow: number,
+    startCol: number,
+    direction: Direction
+  ) => {
+    const directionVectors = {
+      horizontal: { dx: 1, dy: 0 },
+      vertical: { dx: 0, dy: 1 },
+      diagonal: { dx: 1, dy: 1 }
+    };
+    
+    const { dx, dy } = directionVectors[direction];
+    
+    for (let i = 0; i < word.length; i++) {
+      const row = startRow + i * dy;
+      const col = startCol + i * dx;
+      grid[row][col] = word[i];
+    }
+  };
+
   const generateGrid = (difficulty: Difficulty) => {
     const sizes = { easy: 8, medium: 12, hard: 16 };
     const size = sizes[difficulty];
     const wordList = generateWordList(difficulty);
+    
+    // Initialize empty grid
     const newGrid = Array(size).fill(null).map(() => 
-      Array(size).fill('').map(() => 
-        String.fromCharCode(65 + Math.floor(Math.random() * 26))
-      )
+      Array(size).fill('')
     );
+    
+    // Place each word
+    const placedWords = wordList.filter(word => placeWord(newGrid, word, size));
+    
+    // Fill remaining empty cells with random letters
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (newGrid[i][j] === '') {
+          newGrid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        }
+      }
+    }
+    
     setGrid(newGrid);
-    setWords(wordList);
+    setWords(placedWords);
     setFoundWords(new Set());
     setHintPosition(null);
   };
@@ -144,3 +236,5 @@ export const WordSearchGame = () => {
     </div>
   );
 };
+
+export default WordSearchGame;
