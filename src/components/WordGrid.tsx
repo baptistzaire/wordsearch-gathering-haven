@@ -5,9 +5,10 @@ interface WordGridProps {
   grid: string[][];
   words: string[];
   onWordFound: (word: string) => void;
+  hintPosition: { row: number; col: number } | null;
 }
 
-export const WordGrid: React.FC<WordGridProps> = ({ grid, words, onWordFound }) => {
+export const WordGrid: React.FC<WordGridProps> = ({ grid, words, onWordFound, hintPosition }) => {
   const [selectedCells, setSelectedCells] = useState<number[][]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [foundPaths, setFoundPaths] = useState<Set<string>>(new Set());
@@ -70,6 +71,10 @@ export const WordGrid: React.FC<WordGridProps> = ({ grid, words, onWordFound }) 
     });
   };
 
+  const isHintCell = (row: number, col: number) => {
+    return hintPosition?.row === row && hintPosition?.col === col;
+  };
+
   return (
     <div 
       className="grid gap-1 p-4 bg-card rounded-lg shadow-sm"
@@ -88,7 +93,8 @@ export const WordGrid: React.FC<WordGridProps> = ({ grid, words, onWordFound }) 
             className={cn(
               "letter-cell",
               isCellSelected(rowIndex, colIndex) && "selected",
-              isCellFound(rowIndex, colIndex) && "found"
+              isCellFound(rowIndex, colIndex) && "found",
+              isHintCell(rowIndex, colIndex) && "bg-primary/30"
             )}
             onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
             onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
