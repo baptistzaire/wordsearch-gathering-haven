@@ -8,22 +8,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type Difficulty = 'easy' | 'medium' | 'hard';
+
 interface GameControlsProps {
-  difficulty: string;
-  onDifficultyChange: (difficulty: 'easy' | 'medium' | 'hard') => void;
+  difficulty: Difficulty;
+  setDifficulty: (difficulty: Difficulty) => void;
   onNewGame: () => void;
+  onHint: () => void;
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({
   difficulty,
-  onDifficultyChange,
+  setDifficulty,
   onNewGame,
+  onHint,
 }) => {
   return (
     <div className="flex flex-wrap gap-4 items-center justify-center">
       <Select
         value={difficulty}
-        onValueChange={(value: 'easy' | 'medium' | 'hard') => onDifficultyChange(value)}
+        onValueChange={(value: Difficulty) => setDifficulty(value)}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select difficulty" />
@@ -41,6 +45,14 @@ export const GameControls: React.FC<GameControlsProps> = ({
         className="min-w-[120px]"
       >
         New Game
+      </Button>
+
+      <Button
+        variant="outline"
+        onClick={onHint}
+        className="min-w-[120px]"
+      >
+        Hint
       </Button>
     </div>
   );

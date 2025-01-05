@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface WordGridProps {
   grid: string[][];
   words: string[];
+  foundWords: Set<string>;
   onWordFound: (word: string) => void;
-  hintPosition: { row: number; col: number } | null;
+  hintPosition?: { row: number; col: number } | null;
 }
 
-export const WordGrid: React.FC<WordGridProps> = ({ grid, words, onWordFound, hintPosition }) => {
+export const WordGrid: React.FC<WordGridProps> = ({ 
+  grid, 
+  words, 
+  foundWords,
+  onWordFound, 
+  hintPosition 
+}) => {
   const [selectedCells, setSelectedCells] = useState<number[][]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [foundPaths, setFoundPaths] = useState<Set<string>>(new Set());
