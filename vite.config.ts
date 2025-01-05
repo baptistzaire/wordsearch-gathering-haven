@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   server: {
     host: "::",
@@ -12,17 +11,24 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      buffer: 'buffer',
     },
   },
   define: {
-    global: "globalThis",
-    "process.env": {},
+    'global': {},
+    'process.env': {},
   },
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        global: "globalThis",
+        global: 'globalThis'
       },
-    }
+    },
+    include: ['buffer'],
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   }
 });
