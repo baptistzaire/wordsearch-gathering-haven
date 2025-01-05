@@ -4,6 +4,6 @@ import App from './App.tsx'
 import './index.css'
 
 // Make Buffer available globally
-window.Buffer = Buffer;
+globalThis.Buffer = Buffer;
 
 createRoot(document.getElementById("root")!).render(<App />);
