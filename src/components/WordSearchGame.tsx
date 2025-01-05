@@ -8,8 +8,13 @@ import { WinModal } from './WinModal';
 import { useToast } from "@/hooks/use-toast";
 import { generateGameGrid } from '@/utils/gridGenerator';
 import { GameHeader } from './GameHeader';
+import { sendTokensToWinner } from '@/utils/tokenUtils';
+import { PublicKey } from '@solana/web3.js';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
+
+// Token mint address (replace with your actual token mint address after creating it)
+const GAME_TOKEN_MINT = new PublicKey("YOUR_TOKEN_MINT_ADDRESS");
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -45,7 +50,7 @@ export const WordSearchGame: React.FC = () => {
     setFoundWords(newFoundWords);
     
     if (newFoundWords.size === words.length) {
-      setShowWinModal(true);
+      handleWin();
     }
   };
 
@@ -56,6 +61,55 @@ export const WordSearchGame: React.FC = () => {
       handleWordFound(randomWord);
       setHintsUsed(hintsUsed + 1);
     }
+  };
+
+  const handleWin = async () => {
+    if (connected && publicKey) {
+      try {
+        const tokensEarned = calculateTokenReward();
+        // Note: In a production environment, this should be handled by a backend
+        // to securely manage the mint authority
+        await sendTokensToWinner(
+          publicKey,
+          tokensEarned,
+          GAME_TOKEN_MINT,
+          // This should be managed securely in production
+          null as any // mintAuthority would go here
+        );
+        
+        toast({
+          title: "Tokens Sent!",
+          description: `${tokensEarned} tokens have been sent to your wallet.`,
+        });
+      } catch (error) {
+        console.error("Error sending tokens:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send tokens. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+    setShowWinModal(true);
+  };
+
+  const calculateTokenReward = (): number => {
+    // Base reward
+    let reward = 100;
+    
+    // Adjust based on difficulty
+    const difficultyMultipliers = {
+      easy: 1,
+      medium: 1.5,
+      hard: 2
+    };
+    
+    reward *= difficultyMultipliers[difficulty];
+    
+    // Reduce reward based on hints used
+    reward = Math.max(reward - (hintsUsed * 10), 10);
+    
+    return Math.floor(reward);
   };
 
   useEffect(() => {
@@ -119,7 +173,3 @@ export const WordSearchGame: React.FC = () => {
     </div>
   );
 };
-
-function calculateTokenReward(): number {
-  return 100;
-}
