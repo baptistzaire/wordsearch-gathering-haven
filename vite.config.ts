@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    'global': {},
+    'global': 'globalThis',
     'process.env': {},
   },
   optimizeDeps: {
@@ -28,11 +28,18 @@ export default defineConfig(({ mode }) => ({
         global: 'globalThis'
       },
     },
-    include: ['buffer'],
+    include: [
+      'buffer',
+      '@solana/web3.js',
+      '@solana/spl-token'
+    ],
   },
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    rollupOptions: {
+      plugins: []
+    }
   }
 }));
