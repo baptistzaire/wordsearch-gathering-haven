@@ -16,8 +16,8 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 import { useMemo } from "react";
-
-require("@solana/wallet-adapter-react-ui/styles.css");
+// Import the styles directly
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 const App = () => {
   // Set to 'devnet' for development, 'mainnet-beta' for production
