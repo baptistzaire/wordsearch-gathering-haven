@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { WordGrid } from './WordGrid';
 import { WordList } from './WordList';
@@ -10,7 +11,7 @@ import { LightbulbIcon } from "lucide-react";
 type Difficulty = 'easy' | 'medium' | 'hard';
 type Direction = 'horizontal' | 'vertical' | 'diagonal';
 
-const WordSearchGame = () => {
+export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
   const [words, setWords] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
@@ -236,5 +237,3 @@ const WordSearchGame = () => {
     </div>
   );
 };
-
-export default WordSearchGame;
