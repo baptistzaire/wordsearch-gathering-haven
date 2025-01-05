@@ -4,9 +4,9 @@ import { WordGrid } from './WordGrid';
 import { WordList } from './WordList';
 import { GameControls } from './GameControls';
 import { WinModal } from './WinModal';
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { LightbulbIcon } from "lucide-react";
+import { Wallet } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 type Direction = 'horizontal' | 'vertical' | 'diagonal';
@@ -15,225 +15,205 @@ export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
   const [words, setWords] = useState<string[]>([]);
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [showWinModal, setShowWinModal] = useState(false);
-  const [hintPosition, setHintPosition] = useState<{ row: number; col: number } | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
   const { toast } = useToast();
 
-  const placeWord = (grid: string[][], word: string, size: number): boolean => {
+  const generateGrid = (size: number, wordsToPlace: string[]): string[][] => {
+    const grid = Array(size).fill(null).map(() => Array(size).fill(''));
     const directions: Direction[] = ['horizontal', 'vertical', 'diagonal'];
-    const direction = directions[Math.floor(Math.random() * directions.length)];
     
-    // Try 100 times to place the word
-    for (let attempts = 0; attempts < 100; attempts++) {
-      let row = Math.floor(Math.random() * size);
-      let col = Math.floor(Math.random() * size);
-      
-      // Check if word fits in chosen direction
-      if (canPlaceWord(grid, word, row, col, direction, size)) {
-        placeWordInGrid(grid, word, row, col, direction);
-        return true;
+    wordsToPlace.forEach(word => {
+      let placed = false;
+      while (!placed) {
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+        const [x, y] = getRandomPosition(size, word.length, direction);
+        if (canPlaceWord(grid, word, x, y, direction)) {
+          placeWord(grid, word, x, y, direction);
+          placed = true;
+        }
       }
-    }
-    return false;
-  };
+    });
 
-  const canPlaceWord = (
-    grid: string[][],
-    word: string,
-    startRow: number,
-    startCol: number,
-    direction: Direction,
-    size: number
-  ): boolean => {
-    const directionVectors = {
-      horizontal: { dx: 1, dy: 0 },
-      vertical: { dx: 0, dy: 1 },
-      diagonal: { dx: 1, dy: 1 }
-    };
-    
-    const { dx, dy } = directionVectors[direction];
-    
-    // Check if word fits within grid bounds
-    if (
-      startRow + word.length * dy > size ||
-      startCol + word.length * dx > size
-    ) {
-      return false;
-    }
-    
-    // Check if path is clear or matches existing letters
-    for (let i = 0; i < word.length; i++) {
-      const row = startRow + i * dy;
-      const col = startCol + i * dx;
-      const currentCell = grid[row][col];
-      
-      if (currentCell !== '' && currentCell !== word[i]) {
-        return false;
-      }
-    }
-    
-    return true;
-  };
-
-  const placeWordInGrid = (
-    grid: string[][],
-    word: string,
-    startRow: number,
-    startCol: number,
-    direction: Direction
-  ) => {
-    const directionVectors = {
-      horizontal: { dx: 1, dy: 0 },
-      vertical: { dx: 0, dy: 1 },
-      diagonal: { dx: 1, dy: 1 }
-    };
-    
-    const { dx, dy } = directionVectors[direction];
-    
-    for (let i = 0; i < word.length; i++) {
-      const row = startRow + i * dy;
-      const col = startCol + i * dx;
-      grid[row][col] = word[i];
-    }
-  };
-
-  const generateGrid = (difficulty: Difficulty) => {
-    const sizes = { easy: 8, medium: 12, hard: 16 };
-    const size = sizes[difficulty];
-    const wordList = generateWordList(difficulty);
-    
-    // Initialize empty grid
-    const newGrid = Array(size).fill(null).map(() => 
-      Array(size).fill('')
-    );
-    
-    // Place each word
-    const placedWords = wordList.filter(word => placeWord(newGrid, word, size));
-    
-    // Fill remaining empty cells with random letters
+    // Fill empty spaces with random letters
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
-        if (newGrid[i][j] === '') {
-          newGrid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        if (grid[i][j] === '') {
+          grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
         }
       }
     }
-    
-    setGrid(newGrid);
-    setWords(placedWords);
-    setFoundWords(new Set());
-    setHintPosition(null);
+
+    return grid;
   };
 
-  const generateWordList = (difficulty: Difficulty): string[] => {
-    const wordsByDifficulty = {
+  const getRandomPosition = (size: number, wordLength: number, direction: Direction): [number, number] => {
+    let x, y;
+    if (direction === 'horizontal') {
+      x = Math.floor(Math.random() * (size - wordLength));
+      y = Math.floor(Math.random() * size);
+    } else if (direction === 'vertical') {
+      x = Math.floor(Math.random() * size);
+      y = Math.floor(Math.random() * (size - wordLength));
+    } else {
+      x = Math.floor(Math.random() * (size - wordLength));
+      y = Math.floor(Math.random() * (size - wordLength));
+    }
+    return [x, y];
+  };
+
+  const canPlaceWord = (grid: string[][], word: string, x: number, y: number, direction: Direction): boolean => {
+    for (let i = 0; i < word.length; i++) {
+      let checkX = x;
+      let checkY = y;
+      
+      if (direction === 'horizontal') checkX += i;
+      else if (direction === 'vertical') checkY += i;
+      else {
+        checkX += i;
+        checkY += i;
+      }
+
+      if (grid[checkY][checkX] !== '' && grid[checkY][checkX] !== word[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const placeWord = (grid: string[][], word: string, x: number, y: number, direction: Direction) => {
+    for (let i = 0; i < word.length; i++) {
+      if (direction === 'horizontal') {
+        grid[y][x + i] = word[i];
+      } else if (direction === 'vertical') {
+        grid[y + i][x] = word[i];
+      } else {
+        grid[y + i][x + i] = word[i];
+      }
+    }
+  };
+
+  const startNewGame = () => {
+    const wordLists = {
       easy: ['CAT', 'DOG', 'RAT', 'BAT'],
-      medium: ['MOUSE', 'HORSE', 'TIGER', 'SNAKE', 'EAGLE'],
-      hard: ['ELEPHANT', 'GIRAFFE', 'PENGUIN', 'DOLPHIN', 'OCTOPUS', 'KANGAROO']
+      medium: ['PYTHON', 'JAVA', 'RUBY', 'SWIFT', 'RUST'],
+      hard: ['JAVASCRIPT', 'TYPESCRIPT', 'ASSEMBLY', 'HASKELL']
     };
-    return wordsByDifficulty[difficulty];
+    
+    const gridSizes = { easy: 8, medium: 10, hard: 12 };
+    const selectedWords = wordLists[difficulty];
+    const gridSize = gridSizes[difficulty];
+    
+    setWords(selectedWords);
+    setGrid(generateGrid(gridSize, selectedWords));
+    setFoundWords(new Set());
+    setHintsUsed(0);
+    setShowWinModal(false);
   };
 
   const handleWordFound = (word: string) => {
     const newFoundWords = new Set(foundWords);
     newFoundWords.add(word);
     setFoundWords(newFoundWords);
-    setHintPosition(null);
     
-    toast({
-      title: "Word Found!",
-      description: `You found "${word}"!`,
-      duration: 2000,
-    });
-
     if (newFoundWords.size === words.length) {
       setShowWinModal(true);
     }
   };
 
-  const handleNewGame = () => {
-    generateGrid(difficulty);
-  };
-
-  const handleDifficultyChange = (newDifficulty: Difficulty) => {
-    setDifficulty(newDifficulty);
-    generateGrid(newDifficulty);
-  };
-
-  const getHint = () => {
-    // Find a word that hasn't been found yet
+  const handleHint = () => {
     const remainingWords = words.filter(word => !foundWords.has(word));
-    if (remainingWords.length === 0) return;
+    if (remainingWords.length > 0) {
+      const randomWord = remainingWords[Math.floor(Math.random() * remainingWords.length)];
+      handleWordFound(randomWord);
+      setHintsUsed(hintsUsed + 1);
+    }
+  };
 
-    // Select a random word from remaining words
-    const randomWord = remainingWords[Math.floor(Math.random() * remainingWords.length)];
-    
-    // Select a random letter position from the word
-    const letterPosition = Math.floor(Math.random() * randomWord.length);
-    const targetLetter = randomWord[letterPosition];
-
-    // Find this letter in the grid
-    for (let i = 0; i < grid.length; i++) {
-      for (let j = 0; j < grid[i].length; j++) {
-        if (grid[i][j] === targetLetter) {
-          setHintPosition({ row: i, col: j });
-          toast({
-            title: "Hint",
-            description: `Look for the letter "${targetLetter}"!`,
-            duration: 3000,
-          });
-          return;
-        }
-      }
+  const connectWallet = async () => {
+    try {
+      // This is a placeholder for actual Solana wallet connection
+      // We'll implement the real connection later
+      setIsWalletConnected(true);
+      toast({
+        title: "Wallet Connected",
+        description: "Successfully connected to your Solana wallet",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect to wallet. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   useEffect(() => {
-    generateGrid(difficulty);
-  }, []);
+    startNewGame();
+  }, [difficulty]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8 animate-fade-in">
-      <h1 className="text-4xl font-bold tracking-tight">Word Search</h1>
-      
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        <GameControls 
-          difficulty={difficulty}
-          onDifficultyChange={handleDifficultyChange}
-          onNewGame={handleNewGame}
-        />
-        <Button
-          variant="outline"
-          onClick={getHint}
-          className="flex items-center gap-2"
-        >
-          <LightbulbIcon className="w-4 h-4" />
-          Hint
-        </Button>
-      </div>
-      
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <WordGrid 
-          grid={grid}
-          words={words}
-          onWordFound={handleWordFound}
-          hintPosition={hintPosition}
-        />
-        
-        <WordList 
-          words={words}
-          foundWords={foundWords}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-purple-800">Solana Word Search Game</h1>
+          {!isWalletConnected ? (
+            <Button 
+              onClick={connectWallet}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </Button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-gray-600">Wallet Connected</span>
+            </div>
+          )}
+        </div>
 
-      <WinModal 
-        isOpen={showWinModal}
-        onClose={() => setShowWinModal(false)}
-        onNewGame={handleNewGame}
-        foundWords={foundWords.size}
-        totalWords={words.length}
-      />
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <GameControls
+            difficulty={difficulty}
+            setDifficulty={setDifficulty}
+            onNewGame={startNewGame}
+            onHint={handleHint}
+          />
+          
+          <div className="mt-6">
+            <WordGrid
+              grid={grid}
+              words={words}
+              foundWords={foundWords}
+              onWordFound={handleWordFound}
+            />
+          </div>
+
+          <div className="mt-6">
+            <WordList words={words} foundWords={foundWords} />
+          </div>
+        </div>
+
+        {showWinModal && (
+          <WinModal
+            onClose={() => setShowWinModal(false)}
+            onNewGame={startNewGame}
+            hintsUsed={hintsUsed}
+            isWalletConnected={isWalletConnected}
+            tokensEarned={calculateTokenReward()}
+          />
+        )}
+      </div>
+      <Toaster />
     </div>
   );
 };
+
+function calculateTokenReward(): number {
+  // Placeholder function for token reward calculation
+  // This will be implemented with actual Solana token logic later
+  return 100;
+}
