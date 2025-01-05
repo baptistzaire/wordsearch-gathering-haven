@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Toaster } from "@/components/ui/toaster";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WordGrid } from './WordGrid';
 import { WordList } from './WordList';
 import { GameControls } from './GameControls';
 import { WinModal } from './WinModal';
-import { Button } from "@/components/ui/button";
-import { Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateGameGrid } from '@/utils/gridGenerator';
 import { GameHeader } from './GameHeader';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
-type Direction = 'horizontal' | 'vertical' | 'diagonal';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -20,7 +18,7 @@ export const WordSearchGame: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { connected, publicKey, wallet } = useWallet();
   const { toast } = useToast();
 
   const startNewGame = () => {
@@ -60,33 +58,30 @@ export const WordSearchGame: React.FC = () => {
     }
   };
 
-  const connectWallet = async () => {
-    try {
-      setIsWalletConnected(true);
-      toast({
-        title: "Wallet Connected",
-        description: "Successfully connected to your Solana wallet",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection Failed",
-        description: "Failed to connect to wallet. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   useEffect(() => {
     startNewGame();
   }, [difficulty]);
+
+  useEffect(() => {
+    if (connected) {
+      toast({
+        title: "Wallet Connected",
+        description: `Connected to ${wallet?.adapter.name}`,
+      });
+    }
+  }, [connected, wallet?.adapter.name]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <GameHeader 
-          isWalletConnected={isWalletConnected}
-          onConnectWallet={connectWallet}
+          isWalletConnected={connected}
+          onConnectWallet={() => null} // WalletMultiButton handles this now
         />
+
+        <div className="flex justify-end">
+          <WalletMultiButton className="bg-purple-600 hover:bg-purple-700" />
+        </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6">
           <GameControls
@@ -116,12 +111,11 @@ export const WordSearchGame: React.FC = () => {
             onClose={() => setShowWinModal(false)}
             onNewGame={startNewGame}
             hintsUsed={hintsUsed}
-            isWalletConnected={isWalletConnected}
+            isWalletConnected={connected}
             tokensEarned={calculateTokenReward()}
           />
         )}
       </div>
-      <Toaster />
     </div>
   );
 };
