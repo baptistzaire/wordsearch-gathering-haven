@@ -84,7 +84,7 @@ export const WordGrid: React.FC<WordGridProps> = ({
 
   return (
     <div 
-      className="grid gap-1 p-4 bg-card rounded-lg shadow-sm"
+      className="game-grid grid"
       style={{ 
         gridTemplateColumns: `repeat(${grid.length}, minmax(0, 1fr))` 
       }}

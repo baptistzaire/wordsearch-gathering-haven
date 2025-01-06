@@ -8,21 +8,18 @@ interface WordListProps {
 
 export const WordList: React.FC<WordListProps> = ({ words, foundWords }) => {
   return (
-    <div className="p-4 bg-card rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Words to Find</h2>
-      <div className="flex flex-wrap gap-2">
-        {words.map((word) => (
-          <div
-            key={word}
-            className={cn(
-              "word-item",
-              foundWords.has(word) && "found"
-            )}
-          >
-            {word}
-          </div>
-        ))}
-      </div>
+    <div className="word-list">
+      {words.map((word) => (
+        <div
+          key={word}
+          className={cn(
+            "word-item",
+            foundWords.has(word) && "found"
+          )}
+        >
+          {word}
+        </div>
+      ))}
     </div>
   );
 };

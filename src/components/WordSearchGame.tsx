@@ -8,6 +8,7 @@ import { WinModal } from './WinModal';
 import { useToast } from "@/hooks/use-toast";
 import { generateGameGrid } from '@/utils/gridGenerator';
 import { GameHeader } from './GameHeader';
+import { Sun, Settings } from 'lucide-react';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -72,38 +73,41 @@ export const WordSearchGame: React.FC = () => {
   }, [connected, wallet?.adapter.name]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <GameHeader 
-          isWalletConnected={connected}
-          onConnectWallet={() => null} // WalletMultiButton handles this now
-        />
-
-        <div className="flex justify-end">
-          <WalletMultiButton className="bg-purple-600 hover:bg-purple-700" />
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50/50 p-4">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="game-header">
+          <button 
+            onClick={startNewGame}
+            className="text-lg font-semibold hover:text-primary transition-colors"
+          >
+            New game
+          </button>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-lg font-medium">Normal</span>
+            <button className="p-2 hover:bg-white rounded-full transition-colors">
+              <Sun className="w-5 h-5" />
+            </button>
+            <button className="p-2 hover:bg-white rounded-full transition-colors">
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <GameControls
-            difficulty={difficulty}
-            setDifficulty={setDifficulty}
-            onNewGame={startNewGame}
-            onHint={handleHint}
-          />
-          
-          <div className="mt-6">
-            <WordGrid
-              grid={grid}
-              words={words}
-              foundWords={foundWords}
-              onWordFound={handleWordFound}
-              hintPosition={null}
-            />
-          </div>
+        <div className="flex justify-end">
+          <WalletMultiButton className="bg-primary hover:bg-primary/90" />
+        </div>
 
-          <div className="mt-6">
-            <WordList words={words} foundWords={foundWords} />
-          </div>
+        <div className="space-y-6">
+          <WordGrid
+            grid={grid}
+            words={words}
+            foundWords={foundWords}
+            onWordFound={handleWordFound}
+            hintPosition={null}
+          />
+
+          <WordList words={words} foundWords={foundWords} />
         </div>
 
         {showWinModal && (
