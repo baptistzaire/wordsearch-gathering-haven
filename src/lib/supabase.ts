@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Replace these with your actual Supabase project URL and anon key
+export const supabase = createClient(
+  'https://your-project-url.supabase.co',  // Replace this with your project URL
+  'your-anon-key'  // Replace this with your project's anon key
+);
 
 export type GameScore = {
   id?: string;
