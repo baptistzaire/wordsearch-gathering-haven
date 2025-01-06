@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Using Lovable's Supabase integration
 export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
+  'https://ixnxjxwxvxvxmxgxnxsxb.supabase.co',  // Replace with your actual Supabase URL
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'    // Replace with your actual anon key
 );
 
 export type GameScore = {
