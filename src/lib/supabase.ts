@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Using Lovable's Supabase integration
 export const supabase = createClient(
-  'https://ixnxjxwxvxvxmxgxnxsxb.supabase.co',  // Replace with your actual Supabase URL
+  'https://ncpczlwrssgihpsbxbum.supabase.co',  // Your Supabase URL
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'    // Replace with your actual anon key
 );
 
