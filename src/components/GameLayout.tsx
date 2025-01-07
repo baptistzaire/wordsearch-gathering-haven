@@ -4,8 +4,7 @@ import { DifficultySelector } from './DifficultySelector';
 import { WalletStatus } from './WalletStatus';
 import { HighScores } from './HighScores';
 import { GameBoard } from './GameBoard';
-
-type Difficulty = 'easy' | 'medium' | 'hard';
+import { Difficulty } from '@/types/game';
 
 interface GameLayoutProps {
   difficulty: Difficulty;
@@ -52,7 +51,7 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
         
         {highScores && <HighScores scores={highScores} />}
         
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
           {children}
         </div>
       </div>

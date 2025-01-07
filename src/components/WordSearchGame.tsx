@@ -7,8 +7,7 @@ import { WinModal } from './WinModal';
 import { GameLayout } from './GameLayout';
 import { GameBoard } from './GameBoard';
 import { useToast } from "@/hooks/use-toast";
-
-export type Difficulty = 'easy' | 'medium' | 'hard';
+import { Difficulty, GameScore } from '@/types/game';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -20,7 +19,6 @@ export const WordSearchGame: React.FC = () => {
   const { connected, publicKey, wallet } = useWallet();
   const { toast } = useToast();
 
-  // Fetch high scores
   const { data: highScores } = useQuery({
     queryKey: ['highScores'],
     queryFn: async () => {

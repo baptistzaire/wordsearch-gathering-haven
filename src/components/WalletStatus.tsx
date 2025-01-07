@@ -2,9 +2,10 @@ import React from 'react';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2, Wallet } from 'lucide-react';
 
 export const WalletStatus: React.FC = () => {
-  const { connected, wallet } = useWallet();
+  const { connected, connecting, wallet } = useWallet();
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -18,7 +19,18 @@ export const WalletStatus: React.FC = () => {
 
   return (
     <div className="flex justify-end">
-      <WalletMultiButton className="bg-primary hover:bg-primary/90" />
+      <WalletMultiButton 
+        className={`flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-colors ${
+          connecting ? 'opacity-70' : ''
+        }`}
+      >
+        {connecting ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Wallet className="w-4 h-4" />
+        )}
+        {connecting ? 'Connecting...' : connected ? 'Connected' : 'Connect Wallet'}
+      </WalletMultiButton>
     </div>
   );
 };
