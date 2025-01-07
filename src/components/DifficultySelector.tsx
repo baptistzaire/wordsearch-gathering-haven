@@ -7,9 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type Difficulty = 'easy' | 'medium' | 'hard';
+
 interface DifficultySelectorProps {
-  currentDifficulty: string;
-  onSelect: (difficulty: string) => void;
+  currentDifficulty: Difficulty;
+  onSelect: (difficulty: Difficulty) => void;
 }
 
 export const DifficultySelector: React.FC<DifficultySelectorProps> = ({

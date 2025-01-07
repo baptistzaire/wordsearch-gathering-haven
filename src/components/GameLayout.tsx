@@ -5,9 +5,11 @@ import { WalletStatus } from './WalletStatus';
 import { HighScores } from './HighScores';
 import { GameBoard } from './GameBoard';
 
+type Difficulty = 'easy' | 'medium' | 'hard';
+
 interface GameLayoutProps {
-  difficulty: string;
-  setDifficulty: (difficulty: string) => void;
+  difficulty: Difficulty;
+  setDifficulty: (difficulty: Difficulty) => void;
   startNewGame: () => void;
   highScores?: any[];
   children: React.ReactNode;
