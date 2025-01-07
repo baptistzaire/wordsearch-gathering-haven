@@ -107,6 +107,35 @@ export const WordSearchGame: React.FC = () => {
     return Math.max(0, Math.floor((baseScore - hintPenalty) * difficultyMultiplier));
   };
 
+  const calculateTokenReward = () => {
+    const baseReward = 100;
+    const difficultyMultipliers = {
+      easy: 1,
+      medium: 1.5,
+      hard: 2
+    };
+    
+    // Calculate time bonus (if we implement a timer later)
+    const timeBonus = 1; // Placeholder for now
+    
+    // Calculate word completion bonus
+    const wordCompletionRate = foundWords.size / words.length;
+    const completionBonus = wordCompletionRate === 1 ? 1.2 : 1;
+    
+    // Apply hint penalty
+    const hintPenalty = Math.max(0, 1 - (hintsUsed * 0.1));
+    
+    const finalReward = Math.floor(
+      baseReward * 
+      difficultyMultipliers[difficulty] * 
+      timeBonus * 
+      completionBonus * 
+      hintPenalty
+    );
+    
+    return finalReward;
+  };
+
   useEffect(() => {
     startNewGame();
   }, [difficulty]);
@@ -133,12 +162,11 @@ export const WordSearchGame: React.FC = () => {
           hintsUsed={hintsUsed}
           isWalletConnected={connected}
           tokensEarned={calculateTokenReward()}
+          difficulty={difficulty}
+          wordsFound={foundWords.size}
+          totalWords={words.length}
         />
       )}
     </GameLayout>
   );
 };
-
-function calculateTokenReward(): number {
-  return 100;
-}
