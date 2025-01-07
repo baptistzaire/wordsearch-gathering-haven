@@ -26,14 +26,17 @@ export const WinModal: React.FC<WinModalProps> = ({
 }) => {
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md"
+        aria-describedby="win-modal-description"
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center text-2xl font-bold">
             <Trophy className="w-8 h-8 text-yellow-500 mr-2" />
             Congratulations!
           </DialogTitle>
         </DialogHeader>
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4" id="win-modal-description">
           <p className="text-lg">You found all the words!</p>
           <p className="text-sm text-gray-600">Hints used: {hintsUsed}</p>
           
