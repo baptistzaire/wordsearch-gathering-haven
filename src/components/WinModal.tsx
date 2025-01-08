@@ -7,8 +7,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trophy, Coins, Clock, Star, AlertTriangle } from "lucide-react";
+import { Trophy, Coins, AlertTriangle } from "lucide-react";
 import { Difficulty } from '@/types/game';
+import { SocialShare } from './SocialShare';
 
 interface WinModalProps {
   onClose: () => void;
@@ -93,6 +94,13 @@ export const WinModal: React.FC<WinModalProps> = ({
               </p>
             </div>
           )}
+
+          <SocialShare
+            difficulty={difficulty}
+            wordsFound={wordsFound}
+            totalWords={totalWords}
+            tokensEarned={tokensEarned}
+          />
         </div>
         
         <DialogFooter className="sm:justify-center gap-2">
