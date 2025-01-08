@@ -7,9 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trophy, Coins, AlertTriangle } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { Difficulty } from '@/types/game';
 import { SocialShare } from './SocialShare';
+import { RewardDetails } from './RewardDetails';
 
 interface WinModalProps {
   onClose: () => void;
@@ -32,12 +33,6 @@ export const WinModal: React.FC<WinModalProps> = ({
   wordsFound,
   totalWords,
 }) => {
-  const difficultyMultipliers = {
-    easy: '1x',
-    medium: '1.5x',
-    hard: '2x'
-  };
-
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent 
@@ -54,46 +49,14 @@ export const WinModal: React.FC<WinModalProps> = ({
         <div className="text-center space-y-4" id="win-modal-description">
           <p className="text-lg">You found all the words!</p>
           
-          {isWalletConnected ? (
-            <div className="space-y-4">
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <div className="flex items-center justify-center text-purple-800 mb-4">
-                  <Coins className="w-6 h-6 mr-2" />
-                  <span className="text-xl font-bold">{tokensEarned} Tokens Earned!</span>
-                </div>
-                
-                <div className="space-y-2 text-sm text-purple-700">
-                  <div className="flex items-center justify-between">
-                    <span>Difficulty Bonus:</span>
-                    <span className="font-medium">{difficultyMultipliers[difficulty]}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Words Found:</span>
-                    <span className="font-medium">{wordsFound}/{totalWords}</span>
-                  </div>
-                  
-                  {hintsUsed > 0 && (
-                    <div className="flex items-center justify-between text-amber-600">
-                      <span>Hint Penalty:</span>
-                      <span className="font-medium">-{hintsUsed * 10}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="text-sm text-gray-500 flex items-center justify-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Transaction fees will apply when claiming rewards</span>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">
-                Connect your wallet to earn tokens for completing puzzles!
-              </p>
-            </div>
-          )}
+          <RewardDetails
+            isWalletConnected={isWalletConnected}
+            tokensEarned={tokensEarned}
+            difficulty={difficulty}
+            wordsFound={wordsFound}
+            totalWords={totalWords}
+            hintsUsed={hintsUsed}
+          />
 
           <SocialShare
             difficulty={difficulty}

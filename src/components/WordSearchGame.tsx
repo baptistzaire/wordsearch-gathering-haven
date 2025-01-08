@@ -3,11 +3,13 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { generateGameGrid } from '@/utils/gridGenerator';
+import { calculateGameScore, calculateTokenReward } from '@/utils/gameScoring';
 import { WinModal } from './WinModal';
 import { GameLayout } from './GameLayout';
 import { GameBoard } from './GameBoard';
+import { GameStatus } from './GameStatus';
 import { useToast } from "@/hooks/use-toast";
-import { Difficulty, GameScore } from '@/types/game';
+import { Difficulty } from '@/types/game';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -16,7 +18,7 @@ export const WordSearchGame: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [hintsUsed, setHintsUsed] = useState(0);
-  const { connected, publicKey, wallet } = useWallet();
+  const { connected, publicKey } = useWallet();
   const { toast } = useToast();
 
   const { data: highScores } = useQuery({
@@ -34,7 +36,6 @@ export const WordSearchGame: React.FC = () => {
     enabled: connected,
   });
 
-  // Save score mutation
   const { mutate: saveScore } = useMutation({
     mutationFn: async (score: number) => {
       if (!publicKey) throw new Error('Wallet not connected');
@@ -94,46 +95,10 @@ export const WordSearchGame: React.FC = () => {
     if (newFoundWords.size === words.length) {
       setShowWinModal(true);
       if (connected) {
-        const score = calculateScore();
+        const score = calculateGameScore(words.length, hintsUsed, difficulty);
         saveScore(score);
       }
     }
-  };
-
-  const calculateScore = () => {
-    const baseScore = words.length * 100;
-    const hintPenalty = hintsUsed * 25;
-    const difficultyMultiplier = { easy: 1, medium: 1.5, hard: 2 }[difficulty];
-    return Math.max(0, Math.floor((baseScore - hintPenalty) * difficultyMultiplier));
-  };
-
-  const calculateTokenReward = () => {
-    const baseReward = 100;
-    const difficultyMultipliers = {
-      easy: 1,
-      medium: 1.5,
-      hard: 2
-    };
-    
-    // Calculate time bonus (if we implement a timer later)
-    const timeBonus = 1; // Placeholder for now
-    
-    // Calculate word completion bonus
-    const wordCompletionRate = foundWords.size / words.length;
-    const completionBonus = wordCompletionRate === 1 ? 1.2 : 1;
-    
-    // Apply hint penalty
-    const hintPenalty = Math.max(0, 1 - (hintsUsed * 0.1));
-    
-    const finalReward = Math.floor(
-      baseReward * 
-      difficultyMultipliers[difficulty] * 
-      timeBonus * 
-      completionBonus * 
-      hintPenalty
-    );
-    
-    return finalReward;
   };
 
   useEffect(() => {
@@ -147,6 +112,8 @@ export const WordSearchGame: React.FC = () => {
       startNewGame={startNewGame}
       highScores={highScores}
     >
+      <GameStatus highScores={highScores} />
+      
       <GameBoard
         grid={grid}
         words={words}
@@ -161,7 +128,7 @@ export const WordSearchGame: React.FC = () => {
           onNewGame={startNewGame}
           hintsUsed={hintsUsed}
           isWalletConnected={connected}
-          tokensEarned={calculateTokenReward()}
+          tokensEarned={calculateTokenReward(100, difficulty, foundWords.size, words.length, hintsUsed)}
           difficulty={difficulty}
           wordsFound={foundWords.size}
           totalWords={words.length}
