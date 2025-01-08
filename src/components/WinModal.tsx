@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trophy, Coins, Clock, AlertTriangle } from "lucide-react";
+import { Trophy, Coins, AlertTriangle } from "lucide-react";
 import { Difficulty } from '@/types/game';
 import { SocialShare } from './SocialShare';
 
@@ -20,7 +20,6 @@ interface WinModalProps {
   difficulty: Difficulty;
   wordsFound: number;
   totalWords: number;
-  timeLeft: number;
 }
 
 export const WinModal: React.FC<WinModalProps> = ({
@@ -32,18 +31,11 @@ export const WinModal: React.FC<WinModalProps> = ({
   difficulty,
   wordsFound,
   totalWords,
-  timeLeft,
 }) => {
   const difficultyMultipliers = {
     easy: '1x',
     medium: '1.5x',
     hard: '2x'
-  };
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -55,21 +47,12 @@ export const WinModal: React.FC<WinModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center text-2xl font-bold">
             <Trophy className="w-8 h-8 text-yellow-500 mr-2" />
-            {wordsFound === totalWords ? 'Congratulations!' : 'Time\'s Up!'}
+            Congratulations!
           </DialogTitle>
         </DialogHeader>
         
         <div className="text-center space-y-4" id="win-modal-description">
-          <p className="text-lg">
-            {wordsFound === totalWords 
-              ? 'You found all the words!' 
-              : `You found ${wordsFound} out of ${totalWords} words`}
-          </p>
-          
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>Time Remaining: {formatTime(timeLeft)}</span>
-          </div>
+          <p className="text-lg">You found all the words!</p>
           
           {isWalletConnected ? (
             <div className="space-y-4">
