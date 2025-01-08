@@ -6,6 +6,7 @@ import { generateGameGrid } from '@/utils/gridGenerator';
 import { WinModal } from './WinModal';
 import { GameLayout } from './GameLayout';
 import { GameBoard } from './GameBoard';
+import { Timer } from './Timer';
 import { useToast } from "@/hooks/use-toast";
 import { Difficulty, GameScore } from '@/types/game';
 
@@ -16,8 +17,16 @@ export const WordSearchGame: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(180); // Default to easy mode time
+  const [isGameActive, setIsGameActive] = useState(false);
   const { connected, publicKey, wallet } = useWallet();
   const { toast } = useToast();
+
+  const difficultySettings = {
+    easy: { timeLimit: 180, gridSize: 8 },
+    medium: { timeLimit: 240, gridSize: 10 },
+    hard: { timeLimit: 300, gridSize: 12 }
+  };
 
   const { data: highScores } = useQuery({
     queryKey: ['highScores'],
@@ -68,6 +77,16 @@ export const WordSearchGame: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isGameActive && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isGameActive, timeLeft]);
+
   const startNewGame = () => {
     const wordLists = {
       easy: ['CAT', 'DOG', 'RAT', 'BAT'],
@@ -75,15 +94,25 @@ export const WordSearchGame: React.FC = () => {
       hard: ['JAVASCRIPT', 'TYPESCRIPT', 'ASSEMBLY', 'HASKELL']
     };
     
-    const gridSizes = { easy: 8, medium: 10, hard: 12 };
     const selectedWords = wordLists[difficulty];
-    const gridSize = gridSizes[difficulty];
+    const { gridSize, timeLimit } = difficultySettings[difficulty];
     
     setWords(selectedWords);
     setGrid(generateGameGrid(gridSize, selectedWords));
     setFoundWords(new Set());
     setHintsUsed(0);
+    setTimeLeft(timeLimit);
     setShowWinModal(false);
+    setIsGameActive(true);
+  };
+
+  const handleTimeUp = () => {
+    setIsGameActive(false);
+    setShowWinModal(true);
+    if (connected) {
+      const score = calculateScore();
+      saveScore(score);
+    }
   };
 
   const handleWordFound = (word: string) => {
@@ -92,6 +121,7 @@ export const WordSearchGame: React.FC = () => {
     setFoundWords(newFoundWords);
     
     if (newFoundWords.size === words.length) {
+      setIsGameActive(false);
       setShowWinModal(true);
       if (connected) {
         const score = calculateScore();
@@ -103,8 +133,9 @@ export const WordSearchGame: React.FC = () => {
   const calculateScore = () => {
     const baseScore = words.length * 100;
     const hintPenalty = hintsUsed * 25;
+    const timeBonus = Math.floor((timeLeft / difficultySettings[difficulty].timeLimit) * 100);
     const difficultyMultiplier = { easy: 1, medium: 1.5, hard: 2 }[difficulty];
-    return Math.max(0, Math.floor((baseScore - hintPenalty) * difficultyMultiplier));
+    return Math.max(0, Math.floor((baseScore - hintPenalty + timeBonus) * difficultyMultiplier));
   };
 
   const calculateTokenReward = () => {
@@ -147,13 +178,21 @@ export const WordSearchGame: React.FC = () => {
       startNewGame={startNewGame}
       highScores={highScores}
     >
-      <GameBoard
-        grid={grid}
-        words={words}
-        foundWords={foundWords}
-        onWordFound={handleWordFound}
-        hintPosition={null}
-      />
+      <div className="space-y-6">
+        <Timer 
+          timeLimit={difficultySettings[difficulty].timeLimit}
+          timeLeft={timeLeft}
+          onTimeUp={handleTimeUp}
+        />
+        
+        <GameBoard
+          grid={grid}
+          words={words}
+          foundWords={foundWords}
+          onWordFound={handleWordFound}
+          hintPosition={null}
+        />
+      </div>
       
       {showWinModal && (
         <WinModal
@@ -165,6 +204,7 @@ export const WordSearchGame: React.FC = () => {
           difficulty={difficulty}
           wordsFound={foundWords.size}
           totalWords={words.length}
+          timeLeft={timeLeft}
         />
       )}
     </GameLayout>
