@@ -6,6 +6,7 @@ import { generateGameGrid } from '@/utils/gridGenerator';
 import { WinModal } from './WinModal';
 import { GameLayout } from './GameLayout';
 import { GameBoard } from './GameBoard';
+import { Timer } from './Timer';
 import { useToast } from "@/hooks/use-toast";
 import { Difficulty, GameScore } from '@/types/game';
 
@@ -16,8 +17,16 @@ export const WordSearchGame: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [hintsUsed, setHintsUsed] = useState(0);
-  const { connected, publicKey, wallet } = useWallet();
+  const [isGameActive, setIsGameActive] = useState(false);
+  const [gameResult, setGameResult] = useState<'won' | 'timeout' | null>(null);
+  const { connected, publicKey } = useWallet();
   const { toast } = useToast();
+
+  const difficultyParams = {
+    easy: { gridSize: 8, timeLimit: 180, rewardMultiplier: 1 },
+    medium: { gridSize: 10, timeLimit: 240, rewardMultiplier: 1.5 },
+    hard: { gridSize: 12, timeLimit: 300, rewardMultiplier: 2 },
+  };
 
   const { data: highScores } = useQuery({
     queryKey: ['highScores'],
@@ -34,7 +43,6 @@ export const WordSearchGame: React.FC = () => {
     enabled: connected,
   });
 
-  // Save score mutation
   const { mutate: saveScore } = useMutation({
     mutationFn: async (score: number) => {
       if (!publicKey) throw new Error('Wallet not connected');
@@ -75,15 +83,16 @@ export const WordSearchGame: React.FC = () => {
       hard: ['JAVASCRIPT', 'TYPESCRIPT', 'ASSEMBLY', 'HASKELL']
     };
     
-    const gridSizes = { easy: 8, medium: 10, hard: 12 };
     const selectedWords = wordLists[difficulty];
-    const gridSize = gridSizes[difficulty];
+    const gridSize = difficultyParams[difficulty].gridSize;
     
     setWords(selectedWords);
     setGrid(generateGameGrid(gridSize, selectedWords));
     setFoundWords(new Set());
     setHintsUsed(0);
     setShowWinModal(false);
+    setGameResult(null);
+    setIsGameActive(true);
   };
 
   const handleWordFound = (word: string) => {
@@ -92,31 +101,37 @@ export const WordSearchGame: React.FC = () => {
     setFoundWords(newFoundWords);
     
     if (newFoundWords.size === words.length) {
-      setShowWinModal(true);
-      if (connected) {
-        const score = calculateScore();
-        saveScore(score);
-      }
+      handleGameEnd('won');
+    }
+  };
+
+  const handleTimeUp = () => {
+    if (foundWords.size < words.length) {
+      handleGameEnd('timeout');
+    }
+  };
+
+  const handleGameEnd = (result: 'won' | 'timeout') => {
+    setIsGameActive(false);
+    setGameResult(result);
+    setShowWinModal(true);
+    
+    if (connected && result === 'won') {
+      const score = calculateScore();
+      saveScore(score);
     }
   };
 
   const calculateScore = () => {
     const baseScore = words.length * 100;
     const hintPenalty = hintsUsed * 25;
-    const difficultyMultiplier = { easy: 1, medium: 1.5, hard: 2 }[difficulty];
+    const difficultyMultiplier = difficultyParams[difficulty].rewardMultiplier;
     return Math.max(0, Math.floor((baseScore - hintPenalty) * difficultyMultiplier));
   };
 
   const calculateTokenReward = () => {
     const baseReward = 100;
-    const difficultyMultipliers = {
-      easy: 1,
-      medium: 1.5,
-      hard: 2
-    };
-    
-    // Calculate time bonus (if we implement a timer later)
-    const timeBonus = 1; // Placeholder for now
+    const difficultyMultiplier = difficultyParams[difficulty].rewardMultiplier;
     
     // Calculate word completion bonus
     const wordCompletionRate = foundWords.size / words.length;
@@ -127,8 +142,7 @@ export const WordSearchGame: React.FC = () => {
     
     const finalReward = Math.floor(
       baseReward * 
-      difficultyMultipliers[difficulty] * 
-      timeBonus * 
+      difficultyMultiplier * 
       completionBonus * 
       hintPenalty
     );
@@ -147,13 +161,21 @@ export const WordSearchGame: React.FC = () => {
       startNewGame={startNewGame}
       highScores={highScores}
     >
-      <GameBoard
-        grid={grid}
-        words={words}
-        foundWords={foundWords}
-        onWordFound={handleWordFound}
-        hintPosition={null}
-      />
+      <div className="space-y-4">
+        <Timer 
+          timeLimit={difficultyParams[difficulty].timeLimit}
+          onTimeUp={handleTimeUp}
+          isActive={isGameActive}
+        />
+        
+        <GameBoard
+          grid={grid}
+          words={words}
+          foundWords={foundWords}
+          onWordFound={handleWordFound}
+          hintPosition={null}
+        />
+      </div>
       
       {showWinModal && (
         <WinModal
@@ -165,6 +187,7 @@ export const WordSearchGame: React.FC = () => {
           difficulty={difficulty}
           wordsFound={foundWords.size}
           totalWords={words.length}
+          gameResult={gameResult}
         />
       )}
     </GameLayout>

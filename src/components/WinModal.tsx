@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Trophy, Coins, AlertTriangle } from "lucide-react";
+import { Trophy, Coins, AlertTriangle, Clock } from "lucide-react";
 import { Difficulty } from '@/types/game';
 import { SocialShare } from './SocialShare';
 
@@ -20,6 +20,7 @@ interface WinModalProps {
   difficulty: Difficulty;
   wordsFound: number;
   totalWords: number;
+  gameResult: 'won' | 'timeout' | null;
 }
 
 export const WinModal: React.FC<WinModalProps> = ({
@@ -31,6 +32,7 @@ export const WinModal: React.FC<WinModalProps> = ({
   difficulty,
   wordsFound,
   totalWords,
+  gameResult,
 }) => {
   const difficultyMultipliers = {
     easy: '1x',
@@ -46,15 +48,28 @@ export const WinModal: React.FC<WinModalProps> = ({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center justify-center text-2xl font-bold">
-            <Trophy className="w-8 h-8 text-yellow-500 mr-2" />
-            Congratulations!
+            {gameResult === 'won' ? (
+              <>
+                <Trophy className="w-8 h-8 text-yellow-500 mr-2" />
+                Congratulations!
+              </>
+            ) : (
+              <>
+                <Clock className="w-8 h-8 text-blue-500 mr-2" />
+                Time's Up!
+              </>
+            )}
           </DialogTitle>
         </DialogHeader>
         
         <div className="text-center space-y-4" id="win-modal-description">
-          <p className="text-lg">You found all the words!</p>
+          <p className="text-lg">
+            {gameResult === 'won' 
+              ? "You found all the words!" 
+              : "You ran out of time!"}
+          </p>
           
-          {isWalletConnected ? (
+          {isWalletConnected && gameResult === 'won' && (
             <div className="space-y-4">
               <div className="bg-purple-50 p-4 rounded-lg">
                 <div className="flex items-center justify-center text-purple-800 mb-4">
@@ -87,12 +102,6 @@ export const WinModal: React.FC<WinModalProps> = ({
                 <span>Transaction fees will apply when claiming rewards</span>
               </div>
             </div>
-          ) : (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">
-                Connect your wallet to earn tokens for completing puzzles!
-              </p>
-            </div>
           )}
 
           <SocialShare
@@ -113,7 +122,7 @@ export const WinModal: React.FC<WinModalProps> = ({
           >
             Play Again
           </Button>
-          {isWalletConnected && (
+          {isWalletConnected && gameResult === 'won' && (
             <Button
               variant="outline"
               onClick={onClose}
