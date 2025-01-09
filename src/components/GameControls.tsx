@@ -25,28 +25,6 @@ export const GameControls: React.FC<GameControlsProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap gap-4 items-center justify-center">
-      <Select
-        value={difficulty}
-        onValueChange={(value: Difficulty) => setDifficulty(value)}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select difficulty" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="easy">Easy</SelectItem>
-          <SelectItem value="medium">Medium</SelectItem>
-          <SelectItem value="hard">Hard</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Button
-        variant="outline"
-        onClick={onNewGame}
-        className="min-w-[120px]"
-      >
-        New Game
-      </Button>
-
       <Button
         variant="outline"
         onClick={onHint}

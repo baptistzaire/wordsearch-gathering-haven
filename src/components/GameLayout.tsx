@@ -25,18 +25,6 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50/50 p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="game-header">
-          <button 
-            onClick={startNewGame}
-            className="text-lg font-semibold hover:text-primary transition-colors"
-          >
-            New game
-          </button>
-          
-          <DifficultySelector 
-            currentDifficulty={difficulty} 
-            onSelect={setDifficulty} 
-          />
-          
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-white rounded-full transition-colors">
               <Sun className="w-5 h-5" />
