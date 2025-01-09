@@ -10,6 +10,8 @@ import { GameBoard } from './GameBoard';
 import { GameStatus } from './GameStatus';
 import { useToast } from "@/hooks/use-toast";
 import { Difficulty } from '@/types/game';
+import { Button } from './ui/button';
+import { PlayCircle } from 'lucide-react';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -18,6 +20,7 @@ export const WordSearchGame: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
 
@@ -70,6 +73,15 @@ export const WordSearchGame: React.FC = () => {
   });
 
   const startNewGame = () => {
+    if (!connected) {
+      toast({
+        title: "Connect Wallet",
+        description: "Please connect your wallet to start the game.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const wordLists = {
       easy: ['CAT', 'DOG', 'RAT', 'BAT'],
       medium: ['PYTHON', 'JAVA', 'RUBY', 'SWIFT', 'RUST'],
@@ -85,6 +97,7 @@ export const WordSearchGame: React.FC = () => {
     setFoundWords(new Set());
     setHintsUsed(0);
     setShowWinModal(false);
+    setGameStarted(true);
   };
 
   const handleWordFound = (word: string) => {
@@ -101,10 +114,6 @@ export const WordSearchGame: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    startNewGame();
-  }, [difficulty]);
-
   return (
     <GameLayout
       difficulty={difficulty}
@@ -114,13 +123,33 @@ export const WordSearchGame: React.FC = () => {
     >
       <GameStatus highScores={highScores} />
       
-      <GameBoard
-        grid={grid}
-        words={words}
-        foundWords={foundWords}
-        onWordFound={handleWordFound}
-        hintPosition={null}
-      />
+      {!gameStarted ? (
+        <div className="flex flex-col items-center space-y-6 p-8">
+          <h2 className="text-2xl font-semibold text-purple-800">
+            Welcome to Word Search Game
+          </h2>
+          <p className="text-gray-600 text-center max-w-md">
+            Connect your wallet and select difficulty to start playing.
+            Find all the words to earn tokens!
+          </p>
+          <Button
+            onClick={startNewGame}
+            disabled={!connected}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium"
+          >
+            <PlayCircle className="w-5 h-5 mr-2" />
+            Start Game
+          </Button>
+        </div>
+      ) : (
+        <GameBoard
+          grid={grid}
+          words={words}
+          foundWords={foundWords}
+          onWordFound={handleWordFound}
+          hintPosition={null}
+        />
+      )}
       
       {showWinModal && (
         <WinModal
