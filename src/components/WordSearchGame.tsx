@@ -14,6 +14,7 @@ import { GameMode, BLITZ_INTERVAL } from '@/types/gameMode';
 import { Button } from './ui/button';
 import { PlayCircle } from 'lucide-react';
 import { GameModeSelector } from './GameModeSelector';
+import { DifficultySelector } from './DifficultySelector';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -159,6 +160,10 @@ export const WordSearchGame: React.FC = () => {
             <GameModeSelector
               currentMode={gameMode}
               onSelect={setGameMode}
+            />
+            <DifficultySelector
+              currentDifficulty={difficulty}
+              onSelect={setDifficulty}
             />
             <Button
               onClick={startNewGame}
