@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -10,8 +10,10 @@ import { GameBoard } from './GameBoard';
 import { GameStatus } from './GameStatus';
 import { useToast } from "@/hooks/use-toast";
 import { Difficulty } from '@/types/game';
+import { GameMode, BLITZ_INTERVAL } from '@/types/gameMode';
 import { Button } from './ui/button';
 import { PlayCircle } from 'lucide-react';
+import { GameModeSelector } from './GameModeSelector';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -19,6 +21,7 @@ export const WordSearchGame: React.FC = () => {
   const [foundWords, setFoundWords] = useState<Set<string>>(new Set());
   const [showWinModal, setShowWinModal] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [gameMode, setGameMode] = useState<GameMode>('classic');
   const [hintsUsed, setHintsUsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const { connected, publicKey } = useWallet();
@@ -72,6 +75,21 @@ export const WordSearchGame: React.FC = () => {
     },
   });
 
+  const generateNewGrid = useCallback(() => {
+    const wordLists = {
+      easy: ['CAT', 'DOG', 'RAT', 'BAT'],
+      medium: ['PYTHON', 'JAVA', 'RUBY', 'SWIFT', 'RUST'],
+      hard: ['JAVASCRIPT', 'TYPESCRIPT', 'ASSEMBLY', 'HASKELL']
+    };
+    
+    const gridSizes = { easy: 8, medium: 10, hard: 12 };
+    const selectedWords = wordLists[difficulty].filter(word => !foundWords.has(word));
+    const gridSize = gridSizes[difficulty];
+    
+    setWords(selectedWords);
+    setGrid(generateGameGrid(gridSize, selectedWords));
+  }, [difficulty, foundWords]);
+
   const startNewGame = () => {
     if (!connected) {
       toast({
@@ -82,23 +100,28 @@ export const WordSearchGame: React.FC = () => {
       return;
     }
 
-    const wordLists = {
-      easy: ['CAT', 'DOG', 'RAT', 'BAT'],
-      medium: ['PYTHON', 'JAVA', 'RUBY', 'SWIFT', 'RUST'],
-      hard: ['JAVASCRIPT', 'TYPESCRIPT', 'ASSEMBLY', 'HASKELL']
-    };
-    
-    const gridSizes = { easy: 8, medium: 10, hard: 12 };
-    const selectedWords = wordLists[difficulty];
-    const gridSize = gridSizes[difficulty];
-    
-    setWords(selectedWords);
-    setGrid(generateGameGrid(gridSize, selectedWords));
+    generateNewGrid();
     setFoundWords(new Set());
     setHintsUsed(0);
     setShowWinModal(false);
     setGameStarted(true);
   };
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (gameStarted && gameMode === 'blitz') {
+      intervalId = setInterval(() => {
+        generateNewGrid();
+      }, BLITZ_INTERVAL);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [gameStarted, gameMode, generateNewGrid]);
 
   const handleWordFound = (word: string) => {
     const newFoundWords = new Set(foundWords);
@@ -132,14 +155,20 @@ export const WordSearchGame: React.FC = () => {
             Connect your wallet and select difficulty to start playing.
             Find all the words to earn tokens!
           </p>
-          <Button
-            onClick={startNewGame}
-            disabled={!connected}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium"
-          >
-            <PlayCircle className="w-5 h-5 mr-2" />
-            Start Game
-          </Button>
+          <div className="flex flex-col gap-4 items-center">
+            <GameModeSelector
+              currentMode={gameMode}
+              onSelect={setGameMode}
+            />
+            <Button
+              onClick={startNewGame}
+              disabled={!connected}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium"
+            >
+              <PlayCircle className="w-5 h-5 mr-2" />
+              Start Game
+            </Button>
+          </div>
         </div>
       ) : (
         <GameBoard
