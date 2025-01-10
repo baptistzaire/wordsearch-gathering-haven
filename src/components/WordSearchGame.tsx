@@ -189,10 +189,6 @@ export const WordSearchGame: React.FC = () => {
             foundWords={foundWords}
             onWordFound={handleWordFound}
             hintPosition={null}
-          />
-          <WordList 
-            words={words}
-            foundWords={foundWords}
             tokens={tokens}
             onTokensChange={setTokens}
             onWordSwap={handleWordSwap}
