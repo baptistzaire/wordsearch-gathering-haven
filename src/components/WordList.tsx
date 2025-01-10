@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { getRandomSynonym, isOriginalWord } from '@/utils/synonyms';
+import { getRandomSynonym, isOriginalWord, wordSynonyms } from '@/utils/synonyms';
 import { useToast } from "@/hooks/use-toast";
 
 interface WordListProps {
