@@ -25,7 +25,7 @@ export const WordSearchGame: React.FC = () => {
   const [gameMode, setGameMode] = useState<GameMode>('classic');
   const [hintsUsed, setHintsUsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const [tokens, setTokens] = useState(100); // Start with 100 tokens
+  const [tokens, setTokens] = useState(100);
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
 
@@ -93,8 +93,14 @@ export const WordSearchGame: React.FC = () => {
   }, [difficulty, foundWords]);
 
   const handleWordSwap = (oldWord: string, newWord: string) => {
-    const newWords = words.map(w => w === oldWord ? newWord : w);
-    setWords(newWords);
+    if (gameMode === 'semantic') {
+      const newWords = words.map(w => w === oldWord ? newWord : w);
+      setWords(newWords);
+      toast({
+        title: "Word Transformed",
+        description: `${oldWord} changed to ${newWord}`,
+      });
+    }
   };
 
   const startNewGame = () => {
@@ -112,6 +118,7 @@ export const WordSearchGame: React.FC = () => {
     setHintsUsed(0);
     setShowWinModal(false);
     setGameStarted(true);
+    setTokens(100); // Reset tokens for new game
   };
 
   useEffect(() => {

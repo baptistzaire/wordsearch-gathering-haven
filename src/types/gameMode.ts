@@ -1,15 +1,18 @@
-export type GameMode = 'classic' | 'blitz';
+export type GameMode = 'classic' | 'blitz' | 'semantic';
 
-export const BLITZ_INTERVAL = 2000; // 2 seconds in milliseconds
+export const BLITZ_INTERVAL = 2000; // 2 seconds
 
 export const gameModeParams = {
   classic: {
     name: 'Classic',
-    description: 'Find all words at your own pace'
+    description: 'Find words at your own pace'
   },
   blitz: {
     name: 'Blitz',
-    description: 'Grid regenerates every 2 seconds. Race against time!',
-    interval: BLITZ_INTERVAL
+    description: 'Grid regenerates every 2 seconds'
+  },
+  semantic: {
+    name: 'Semantic Shift',
+    description: 'Words transform into synonyms - use tokens to reveal originals'
   }
 };
