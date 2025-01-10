@@ -25,6 +25,7 @@ export const WordSearchGame: React.FC = () => {
   const [gameMode, setGameMode] = useState<GameMode>('classic');
   const [hintsUsed, setHintsUsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [tokens, setTokens] = useState(100); // Start with 100 tokens
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
 
@@ -90,6 +91,11 @@ export const WordSearchGame: React.FC = () => {
     setWords(selectedWords);
     setGrid(generateGameGrid(gridSize, selectedWords));
   }, [difficulty, foundWords]);
+
+  const handleWordSwap = (oldWord: string, newWord: string) => {
+    const newWords = words.map(w => w === oldWord ? newWord : w);
+    setWords(newWords);
+  };
 
   const startNewGame = () => {
     if (!connected) {
@@ -176,13 +182,22 @@ export const WordSearchGame: React.FC = () => {
           </div>
         </div>
       ) : (
-        <GameBoard
-          grid={grid}
-          words={words}
-          foundWords={foundWords}
-          onWordFound={handleWordFound}
-          hintPosition={null}
-        />
+        <>
+          <GameBoard
+            grid={grid}
+            words={words}
+            foundWords={foundWords}
+            onWordFound={handleWordFound}
+            hintPosition={null}
+          />
+          <WordList 
+            words={words}
+            foundWords={foundWords}
+            tokens={tokens}
+            onTokensChange={setTokens}
+            onWordSwap={handleWordSwap}
+          />
+        </>
       )}
       
       {showWinModal && (
