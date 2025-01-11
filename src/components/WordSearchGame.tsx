@@ -25,7 +25,6 @@ export const WordSearchGame: React.FC = () => {
   const [gameMode, setGameMode] = useState<GameMode>('classic');
   const [hintsUsed, setHintsUsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const [tokens, setTokens] = useState(100);
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
 
@@ -92,17 +91,6 @@ export const WordSearchGame: React.FC = () => {
     setGrid(generateGameGrid(gridSize, selectedWords));
   }, [difficulty, foundWords]);
 
-  const handleWordSwap = (oldWord: string, newWord: string) => {
-    if (gameMode === 'semantic') {
-      const newWords = words.map(w => w === oldWord ? newWord : w);
-      setWords(newWords);
-      toast({
-        title: "Word Transformed",
-        description: `${oldWord} changed to ${newWord}`,
-      });
-    }
-  };
-
   const startNewGame = () => {
     if (!connected) {
       toast({
@@ -118,7 +106,6 @@ export const WordSearchGame: React.FC = () => {
     setHintsUsed(0);
     setShowWinModal(false);
     setGameStarted(true);
-    setTokens(100); // Reset tokens for new game
   };
 
   useEffect(() => {
@@ -189,18 +176,13 @@ export const WordSearchGame: React.FC = () => {
           </div>
         </div>
       ) : (
-        <>
-          <GameBoard
-            grid={grid}
-            words={words}
-            foundWords={foundWords}
-            onWordFound={handleWordFound}
-            hintPosition={null}
-            tokens={tokens}
-            onTokensChange={setTokens}
-            onWordSwap={handleWordSwap}
-          />
-        </>
+        <GameBoard
+          grid={grid}
+          words={words}
+          foundWords={foundWords}
+          onWordFound={handleWordFound}
+          hintPosition={null}
+        />
       )}
       
       {showWinModal && (
