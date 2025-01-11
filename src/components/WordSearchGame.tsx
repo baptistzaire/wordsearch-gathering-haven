@@ -30,6 +30,8 @@ export const WordSearchGame: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const { toast } = useToast();
   const [tokens, setTokens] = useState(0);
+
+  // Query for session
   const { data: session } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
@@ -38,19 +40,53 @@ export const WordSearchGame: React.FC = () => {
     },
   });
 
-  if (!session) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen space-y-6 p-4">
-        <h1 className="text-3xl font-bold text-purple-800">
-          Word Search Game
-        </h1>
-        <p className="text-gray-600 text-center max-w-md">
-          Sign in to start playing and earning tokens!
-        </p>
-        <AuthButton />
-      </div>
-    );
-  }
+  // Query for high scores
+  const { data: highScores } = useQuery({
+    queryKey: ['highScores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('game_scores')
+        .select('*')
+        .order('score', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Mutation for saving scores
+  const { mutate: saveScore } = useMutation({
+    mutationFn: async (score: number) => {
+      if (!session?.user.id) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('game_scores')
+        .insert({
+          user_id: session.user.id,
+          score: score,
+          difficulty: difficulty,
+          words_found: Array.from(foundWords),
+          hints_used: hintsUsed
+        });
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Score saved!",
+        description: "Your score has been recorded.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error saving score",
+        description: "There was a problem saving your score.",
+        variant: "destructive",
+      });
+      console.error('Error saving score:', error);
+    },
+  });
 
   const generateNewGrid = useCallback(() => {
     const wordLists = {
@@ -114,6 +150,20 @@ export const WordSearchGame: React.FC = () => {
     }
   };
 
+  if (!session) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-6 p-4">
+        <h1 className="text-3xl font-bold text-purple-800">
+          Word Search Game
+        </h1>
+        <p className="text-gray-600 text-center max-w-md">
+          Sign in to start playing and earning tokens!
+        </p>
+        <AuthButton />
+      </div>
+    );
+  }
+
   return (
     <GameLayout
       difficulty={difficulty}
@@ -124,7 +174,6 @@ export const WordSearchGame: React.FC = () => {
       <TokenWithdrawal 
         tokens={tokens}
         onWithdraw={() => {
-          // Implement withdrawal logic here
           toast({
             title: "Withdrawal initiated",
             description: "Your tokens are being transferred to your wallet.",
