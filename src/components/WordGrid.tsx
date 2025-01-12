@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface WordGridProps {
@@ -84,14 +83,11 @@ export const WordGrid: React.FC<WordGridProps> = ({
   };
 
   return (
-    <motion.div 
-      className="game-grid grid bg-white/80 backdrop-blur-sm border border-white/50 shadow-xl"
+    <div 
+      className="game-grid grid"
       style={{ 
         gridTemplateColumns: `repeat(${grid.length}, minmax(0, 1fr))` 
       }}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
       onMouseLeave={() => {
         setIsSelecting(false);
         setSelectedCells([]);
@@ -99,25 +95,22 @@ export const WordGrid: React.FC<WordGridProps> = ({
     >
       {grid.map((row, rowIndex) => (
         row.map((letter, colIndex) => (
-          <motion.div
+          <div
             key={`${rowIndex}-${colIndex}`}
             className={cn(
               "letter-cell",
-              "hover:shadow-md hover:scale-105 transition-all duration-200",
-              isCellSelected(rowIndex, colIndex) && "selected bg-primary/20 scale-110",
-              isCellFound(rowIndex, colIndex) && "found bg-primary/40",
-              isHintCell(rowIndex, colIndex) && "animate-letter-highlight"
+              isCellSelected(rowIndex, colIndex) && "selected",
+              isCellFound(rowIndex, colIndex) && "found",
+              isHintCell(rowIndex, colIndex) && "bg-primary/30"
             )}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
             onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
             onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
             onMouseUp={handleMouseUp}
           >
             {letter}
-          </motion.div>
+          </div>
         ))
       ))}
-    </motion.div>
+    </div>
   );
 };
