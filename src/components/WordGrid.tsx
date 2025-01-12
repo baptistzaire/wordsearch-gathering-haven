@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface WordGridProps {
@@ -19,6 +19,11 @@ export const WordGrid: React.FC<WordGridProps> = ({
   const [selectedCells, setSelectedCells] = useState<number[][]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [foundPaths, setFoundPaths] = useState<Set<string>>(new Set());
+
+  // Reset foundPaths when words or foundWords change
+  useEffect(() => {
+    setFoundPaths(new Set());
+  }, [words, foundWords]);
 
   const handleMouseDown = (row: number, col: number) => {
     setIsSelecting(true);
