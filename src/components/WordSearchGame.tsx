@@ -96,12 +96,13 @@ export const WordSearchGame: React.FC = () => {
     };
     
     const gridSizes = { easy: 8, medium: 10, hard: 12 };
-    const selectedWords = wordLists[difficulty].filter(word => !foundWords.has(word));
+    const selectedWords = wordLists[difficulty];
     const gridSize = gridSizes[difficulty];
     
     setWords(selectedWords);
-    setGrid(generateGameGrid(gridSize, selectedWords));
-  }, [difficulty, foundWords]);
+    const newGrid = generateGameGrid(gridSize, selectedWords);
+    setGrid(newGrid);
+  }, [difficulty]);
 
   const startNewGame = () => {
     if (!connected) {
@@ -113,11 +114,11 @@ export const WordSearchGame: React.FC = () => {
       return;
     }
 
-    generateNewGrid();
     setFoundWords(new Set());
     setHintsUsed(0);
     setShowWinModal(false);
     setGameStarted(true);
+    generateNewGrid(); // Call this after resetting the state
   };
 
   useEffect(() => {
