@@ -3,20 +3,17 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { generateGameGrid } from '@/utils/gridGenerator';
-import { calculateGameScore, calculateTokenReward } from '@/utils/gameScoring';
-import { WinModal } from './WinModal';
+import { calculateGameScore } from '@/utils/gameScoring';
 import { GameLayout } from './GameLayout';
-import { GameBoard } from './GameBoard';
 import { GameStatus } from './GameStatus';
 import { useToast } from "@/hooks/use-toast";
 import { Difficulty } from '@/types/game';
 import { GameMode, BLITZ_INTERVAL } from '@/types/gameMode';
-import { Button } from './ui/button';
-import { PlayCircle } from 'lucide-react';
-import { GameModeSelector } from './GameModeSelector';
-import { DifficultySelector } from './DifficultySelector';
 import { AuthButton } from './AuthButton';
 import { TokenWithdrawal } from './TokenWithdrawal';
+import { GameInitializer } from './game/GameInitializer';
+import { GameStateManager } from './game/GameStateManager';
+import { GameplayArea } from './game/GameplayArea';
 
 export const WordSearchGame: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>([]);
@@ -118,7 +115,7 @@ export const WordSearchGame: React.FC = () => {
     setHintsUsed(0);
     setShowWinModal(false);
     setGameStarted(true);
-    generateNewGrid(); // Call this after resetting the state
+    generateNewGrid();
   };
 
   useEffect(() => {
@@ -185,35 +182,16 @@ export const WordSearchGame: React.FC = () => {
       <GameStatus highScores={highScores} />
       
       {!gameStarted ? (
-        <div className="flex flex-col items-center space-y-6 p-8">
-          <h2 className="text-2xl font-semibold text-purple-800">
-            Welcome to Word Search Game
-          </h2>
-          <p className="text-gray-600 text-center max-w-md">
-            Connect your wallet and select difficulty to start playing.
-            Find all the words to earn tokens!
-          </p>
-          <div className="flex flex-col gap-4 items-center">
-            <GameModeSelector
-              currentMode={gameMode}
-              onSelect={setGameMode}
-            />
-            <DifficultySelector
-              currentDifficulty={difficulty}
-              onSelect={setDifficulty}
-            />
-            <Button
-              onClick={startNewGame}
-              disabled={!connected}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium"
-            >
-              <PlayCircle className="w-5 h-5 mr-2" />
-              Start Game
-            </Button>
-          </div>
-        </div>
+        <GameInitializer
+          gameMode={gameMode}
+          setGameMode={setGameMode}
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+          startNewGame={startNewGame}
+          connected={connected}
+        />
       ) : (
-        <GameBoard
+        <GameplayArea
           grid={grid}
           words={words}
           foundWords={foundWords}
@@ -222,18 +200,16 @@ export const WordSearchGame: React.FC = () => {
         />
       )}
       
-      {showWinModal && (
-        <WinModal
-          onClose={() => setShowWinModal(false)}
-          onNewGame={startNewGame}
-          hintsUsed={hintsUsed}
-          isWalletConnected={connected}
-          tokensEarned={calculateTokenReward(100, difficulty, foundWords.size, words.length, hintsUsed)}
-          difficulty={difficulty}
-          wordsFound={foundWords.size}
-          totalWords={words.length}
-        />
-      )}
+      <GameStateManager
+        showWinModal={showWinModal}
+        setShowWinModal={setShowWinModal}
+        startNewGame={startNewGame}
+        hintsUsed={hintsUsed}
+        connected={connected}
+        difficulty={difficulty}
+        foundWords={foundWords}
+        words={words}
+      />
     </GameLayout>
   );
 };
