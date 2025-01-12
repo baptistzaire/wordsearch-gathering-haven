@@ -5,6 +5,7 @@ import { WalletStatus } from './WalletStatus';
 import { HighScores } from './HighScores';
 import { GameBoard } from './GameBoard';
 import { Difficulty } from '@/types/game';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface GameLayoutProps {
   difficulty: Difficulty;
@@ -22,16 +23,33 @@ export const GameLayout: React.FC<GameLayoutProps> = ({
   children
 }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50/50 p-4">
+    <div className="min-h-screen bg-[conic-gradient(at_top,_var(--tw-gradient-stops))] from-blue-50 via-purple-50 to-blue-50 p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="game-header">
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-white rounded-full transition-colors">
-              <Sun className="w-5 h-5" />
-            </button>
-            <button className="p-2 hover:bg-white rounded-full transition-colors">
-              <Settings className="w-5 h-5" />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-2 hover:bg-white rounded-full transition-colors">
+                    <Sun className="w-5 h-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle theme</p>
+                </TooltipContent>
+              </Tooltip>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-2 hover:bg-white rounded-full transition-colors">
+                    <Settings className="w-5 h-5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Game settings</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 

@@ -25,7 +25,7 @@
     --ring: 221.2 83.2% 53.3%;
     --radius: 1rem;
   }
- 
+
   * {
     @apply border-border;
   }
@@ -36,13 +36,14 @@
 }
 
 .letter-cell {
-  @apply w-10 h-10 flex items-center justify-center text-lg font-bold 
-         bg-white rounded-md transition-all duration-200 
-         hover:bg-accent/10 cursor-pointer select-none shadow-sm;
+  @apply w-12 h-12 flex items-center justify-center text-lg font-bold 
+         bg-white/80 backdrop-blur-sm rounded-xl transition-all duration-200 
+         hover:bg-accent/10 cursor-pointer select-none shadow-sm
+         hover:scale-105 active:scale-95;
 }
 
 .letter-cell.selected {
-  @apply bg-primary/20;
+  @apply bg-primary/20 scale-105;
 }
 
 .letter-cell.found {
@@ -50,21 +51,26 @@
 }
 
 .word-item {
-  @apply px-4 py-2 text-base font-medium transition-all duration-200 uppercase tracking-wider;
+  @apply px-4 py-2 text-base font-medium transition-all duration-200 
+         uppercase tracking-wider rounded-lg hover:bg-accent/10;
 }
 
 .word-item.found {
-  @apply text-primary font-bold;
+  @apply text-primary font-bold bg-primary/10;
 }
 
 .game-header {
-  @apply flex items-center justify-between px-6 py-4 bg-white/50 backdrop-blur-sm rounded-2xl mb-6;
+  @apply flex items-center justify-between px-6 py-4 
+         bg-white/50 backdrop-blur-sm rounded-2xl mb-6 
+         shadow-sm border border-white/20;
 }
 
 .game-grid {
-  @apply bg-white rounded-3xl shadow-xl p-8 gap-2;
+  @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 gap-2
+         border border-white/20 animate-fade-in;
 }
 
 .word-list {
-  @apply flex flex-wrap gap-4 justify-center mt-8 text-gray-600;
+  @apply flex flex-wrap gap-4 justify-center mt-8 text-gray-600 
+         animate-fade-in;
 }
