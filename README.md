@@ -1,69 +1,152 @@
-# Welcome to your Lovable project
+# Solana Word Search Game 🎮
 
-## Project info
+A decentralized word search puzzle game built on the Solana blockchain, combining classic word search gameplay with Play-to-Earn mechanics.
 
-**URL**: https://lovable.dev/projects/768a5fd3-7219-4548-ada2-02737b7af507
+![Game Preview](public/og-image.png)
 
-## How can I edit this code?
+## 🎯 Features
 
-There are several ways of editing your application.
+### Core Gameplay
+- **Interactive Word Search**: Click-and-drag word selection with visual feedback
+- **Multiple Difficulty Levels**: 
+  - Easy (8x8 grid, 180s, 1x rewards)
+  - Medium (10x10 grid, 240s, 1.5x rewards)
+  - Hard (12x12 grid, 300s, 2x rewards)
+- **Game Modes**:
+  - Classic: Find words at your own pace
+  - Blitz: Grid regenerates every 2 seconds
+  - Semantic Shift: Words change meaning as you find them
 
-**Use Lovable**
+### Blockchain Integration
+- **Solana Wallet Integration**: Secure wallet connection for token transactions
+- **Play-to-Earn**: Earn tokens by completing puzzles
+- **Token Rewards**: Bonus rewards for:
+  - Completing puzzles without hints
+  - Finding secret words
+  - Achieving high scores
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/768a5fd3-7219-4548-ada2-02737b7af507) and start prompting.
+### User Features
+- **Google Authentication**: Secure sign-in with Google
+- **High Score Tracking**: Global leaderboard system
+- **Social Sharing**: Share achievements on social media
+- **Progress Tracking**: Track your gaming statistics
+- **Token Withdrawal**: Transfer earned tokens to your Solana wallet
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js 16+ and npm installed
+- A modern web browser
+- A Solana wallet (e.g., Phantom)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+cd solana-word-search
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open [http://localhost:8080](http://localhost:8080) in your browser
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠 Tech Stack
 
-**Use GitHub Codespaces**
+- **Frontend**:
+  - React 18
+  - TypeScript
+  - Vite
+  - Tailwind CSS
+  - shadcn/ui
+  - Lucide Icons
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Blockchain**:
+  - Solana Web3.js
+  - Wallet Adapter
 
-## What technologies are used for this project?
+- **Backend**:
+  - Supabase
+  - Google Authentication
 
-This project is built with .
+- **State Management**:
+  - TanStack Query (React Query)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎮 How to Play
 
-## How can I deploy this project?
+1. **Sign In**: Use Google authentication to create an account
+2. **Connect Wallet**: Link your Solana wallet to receive rewards
+3. **Choose Mode**: Select from Classic, Blitz, or Semantic Shift
+4. **Select Difficulty**: Pick Easy, Medium, or Hard
+5. **Find Words**: 
+   - Click and drag to select words
+   - Use hints if needed (affects rewards)
+   - Complete the puzzle before time runs out
+6. **Earn Rewards**: 
+   - Tokens awarded based on:
+     - Difficulty level
+     - Time remaining
+     - Hints used
+     - Secret words found
 
-Simply open [Lovable](https://lovable.dev/projects/768a5fd3-7219-4548-ada2-02737b7af507) and click on Share -> Publish.
+## 🏆 Scoring System
 
-## I want to use a custom domain - is that possible?
+- Base points per word: 100
+- Difficulty multipliers:
+  - Easy: 1x
+  - Medium: 1.5x
+  - Hard: 2x
+- Time bonus: Up to 50% bonus for quick completion
+- Hint penalty: -25 points per hint used
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 🔒 Security Features
+
+- Secure wallet integration
+- Google OAuth authentication
+- Protected API endpoints
+- Rate limiting on token withdrawals
+- Smart contract security measures
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Solana](https://solana.com/) - Blockchain platform
+- [shadcn/ui](https://ui.shadcn.com/) - UI components
+- [Supabase](https://supabase.com/) - Backend services
+- [Vite](https://vitejs.dev/) - Frontend tooling
+
+## 📞 Support
+
+For support, please join our [Discord community](https://discord.gg/your-discord) or open an issue in the repository.
+
+## 🚧 Roadmap
+
+- [ ] Mobile responsive design
+- [ ] Multiplayer mode
+- [ ] Additional language support
+- [ ] Advanced difficulty levels
+- [ ] NFT integration
+- [ ] Tournament system
+
+## ⚠️ Known Issues
+
+Please check the [Issues](https://github.com/your-username/your-repo/issues) page for current known issues and their status.
